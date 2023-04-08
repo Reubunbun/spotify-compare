@@ -1,11 +1,11 @@
-import { Handler, HandlerEvent, type HandlerResponse } from '@netlify/functions';
+import { Handler, type HandlerEvent, type HandlerResponse } from '@netlify/functions';
 import { stringify as stringifyQuery } from 'querystring';
 import { PrismaClient } from '@prisma/client';
 import { uuid } from 'uuidv4';
 import axios from 'axios';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from '../../common/Constants';
 
-const handler: Handler = async(event: HandlerEvent) => {
+const handler: Handler = async (event: HandlerEvent) => {
     const prismaClient = new PrismaClient();
 
     try {
@@ -50,8 +50,6 @@ async function main(event: HandlerEvent, prismaClient: PrismaClient) : Promise<H
         },
     );
 
-    console.log(authResponse);
-
     const { data: userResponse } = await axios.get(
         'https://api.spotify.com/v1/me',
         {
@@ -62,14 +60,21 @@ async function main(event: HandlerEvent, prismaClient: PrismaClient) : Promise<H
         },
     );
 
+    let imageURL = null;
+    const bestImage = userResponse.images.pop();
+    if (bestImage) {
+        imageURL = bestImage.url;
+    }
+
     const newUser = await prismaClient.user.create({
         data: {
             email: userResponse.email,
-            refreshToken: authResponse.refreshToken,
-            compareId: uuid()
-        }
+            refreshToken: authResponse.refresh_token,
+            compareId: uuid(),
+            displayHandle: userResponse.display_name,
+            imageURL,
+        },
     });
-
 
     return {
         statusCode: 200,

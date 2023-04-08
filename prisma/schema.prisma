@@ -8,7 +8,9 @@ datasource db {
 }
 
 model User {
-    email        String @db.VarChar(255) @id
-    compareId    String @db.VarChar(255) @unique
-    refreshToken String @db.VarChar(255)
+    email         String  @db.VarChar(255) @id
+    compareId     String  @db.VarChar(255) @unique
+    refreshToken  String  @db.VarChar(255)
+    displayHandle String  @db.VarChar(255)
+    imageURL      String? @db.VarChar(255)
 }

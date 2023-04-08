@@ -2,27 +2,23 @@ import {
     type FC,
     type ReactNode,
     createContext,
-    useState,
     useContext,
     useRef,
 } from 'react';
 import { redirect } from 'react-router-dom';
+import { type User } from '@prisma/client';
+import useLocalStorage from '../Hooks/useLocalStorage';
+import { STORAGE_KEY } from '../../common/Constants';
 
 interface UserContextType {
     login: (spotifyCode: string | null) => void;
-    email: string | null;
-    refreshToken: string | null;
-};
-
-interface User {
-    email: string | null;
-    refreshToken: string | null;
+    user: User | null;
 };
 
 const UserContext = createContext<UserContextType>(undefined!);
 
 export const UserStateProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useLocalStorage<User | null>(STORAGE_KEY, null);
     const madeLoginRequest = useRef<boolean>(false);
 
     const login = (spotifyCode: string | null) : void => {
@@ -48,19 +44,16 @@ export const UserStateProvider: FC<{ children: ReactNode }> = ({ children }) => 
             }
         )
             .then(resp => resp.json())
-            .then(console.log)
+            .then(resp => {
+                setUser(resp);
+                redirect('/home');
+            })
             .catch(console.error)
             .finally(() => madeLoginRequest.current = false);
     };
 
     return (
-        <UserContext.Provider
-            value={{
-                login,
-                email: user?.email || null,
-                refreshToken: user?.refreshToken || null,
-            }}
-        >
+        <UserContext.Provider value={{ login, user }}>
             {children}
         </UserContext.Provider>
     )
