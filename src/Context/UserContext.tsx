@@ -6,19 +6,18 @@ import {
     useRef,
 } from 'react';
 import { redirect } from 'react-router-dom';
-import { type User } from '@prisma/client';
 import useLocalStorage from '../Hooks/useLocalStorage';
-import { STORAGE_KEY } from '../../common/Constants';
+import { type UserResponse, STORAGE_KEY } from '../../common/Constants';
 
 interface UserContextType {
     login: (spotifyCode: string | null) => void;
-    user: User | null;
+    user: UserResponse | null;
 };
 
 const UserContext = createContext<UserContextType>(undefined!);
 
 export const UserStateProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useLocalStorage<User | null>(STORAGE_KEY, null);
+    const [user, setUser] = useLocalStorage<UserResponse | null>(STORAGE_KEY, null);
     const madeLoginRequest = useRef<boolean>(false);
 
     const login = (spotifyCode: string | null) : void => {
@@ -38,10 +37,10 @@ export const UserStateProvider: FC<{ children: ReactNode }> = ({ children }) => 
 
         madeLoginRequest.current = true;
         fetch(
-            `/api/login?code=${spotifyCode}`,
+            `/api/register?code=${spotifyCode}`,
             {
                 method: 'POST',
-            }
+            },
         )
             .then(resp => resp.json())
             .then(resp => {
