@@ -1,40 +1,29 @@
-import { Handler, type HandlerEvent, type HandlerResponse } from '@netlify/functions';
-import { PrismaClient } from '@prisma/client';
 import { uuid } from 'uuidv4';
 import { serialize as serializeCookie } from 'cookie';
-import jwt from 'jsonwebtoken';
-import Spotify from '../../common/Spotify';
+import {
+    sign as signToken
+} from 'jsonwebtoken';
+import Spotify from '../../lib/Spotify';
 import {
     type UserResponse,
     type JWTObject,
     COOKIE_NAME,
-} from '../../common/Constants';
+    COOKIE_EXPIRE_TIME,
+    QUERY_CODE,
+} from '../../lib/Constants';
+import withPrisma from '../../lib/withPrisma';
 
-const handler: Handler = async (event: HandlerEvent) => {
-    const prismaClient = new PrismaClient();
-
-    try {
-        return await main(event, prismaClient);
-    } catch (err) {
-        console.error(err);
-        console.error(err.message);
-        return {
-            statusCode: 500,
-            body: err.message,
-        };
-    } finally {
-        await prismaClient.$disconnect();
-    }
-};
-
-async function main(event: HandlerEvent, prismaClient: PrismaClient) : Promise<HandlerResponse> {
+const handler = withPrisma(async function(
+    prismaClient,
+    event,
+) {
     if (!event.queryStringParameters) {
         return {
             statusCode: 401,
         };
     }
 
-    const { code } = event.queryStringParameters;
+    const { [QUERY_CODE]: code } = event.queryStringParameters;
 
     if (!code) {
         return {
@@ -52,8 +41,16 @@ async function main(event: HandlerEvent, prismaClient: PrismaClient) : Promise<H
         imageURL = bestImage.url;
     }
 
-    const newUser = await prismaClient.user.create({
-        data: {
+    const newUser = await prismaClient.user.upsert({
+        where: {
+            email: userResponse.email,
+        },
+        update: {
+            refreshToken: authResponse.refresh_token,
+            displayHandle: userResponse.display_name,
+            imageURL,
+        },
+        create: {
             email: userResponse.email,
             refreshToken: authResponse.refresh_token,
             compareId: uuid(),
@@ -75,16 +72,14 @@ async function main(event: HandlerEvent, prismaClient: PrismaClient) : Promise<H
         expiresAt: Math.floor(Date.now() / 1000) + authResponse.expires_in,
     };
 
-    const hour = 3600000
-    const twoWeeks = 14 * 24 * hour
     const cookie = serializeCookie(
         COOKIE_NAME,
-        jwt.sign(JSON.stringify(objToSign), process.env.JWT_SECRET!),
+        signToken(JSON.stringify(objToSign), process.env.JWT_SECRET!),
         {
             secure: true,
             httpOnly: true,
             path: '/',
-            maxAge: twoWeeks,
+            maxAge: COOKIE_EXPIRE_TIME,
         },
     );
 
@@ -95,6 +90,6 @@ async function main(event: HandlerEvent, prismaClient: PrismaClient) : Promise<H
         },
         body: JSON.stringify(returnUser),
     };
-}
+});
 
 export { handler };

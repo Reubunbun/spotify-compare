@@ -3,56 +3,70 @@ import {
     type ReactNode,
     createContext,
     useContext,
-    useRef,
+    useState,
 } from 'react';
-import { redirect } from 'react-router-dom';
-import useLocalStorage from '../Hooks/useLocalStorage';
-import { type UserResponse, STORAGE_KEY } from '../../common/Constants';
+import { type UserResponse } from '../../lib/Constants';
 
 interface UserContextType {
-    login: (spotifyCode: string | null) => void;
+    login: () => Promise<boolean>;
+    register: (spotifyCode: string | null) => Promise<boolean>;
     user: UserResponse | null;
 };
 
 const UserContext = createContext<UserContextType>(undefined!);
 
 export const UserStateProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useLocalStorage<UserResponse | null>(STORAGE_KEY, null);
-    const madeLoginRequest = useRef<boolean>(false);
+    const [user, setUser] = useState<UserResponse | null>(null);
 
-    const login = (spotifyCode: string | null) : void => {
-        if (user) {
-            redirect('/home');
-            return;
+    const login = async () : Promise<boolean> => {
+        const resp = await fetch(
+            '/api/login',
+            {
+                method: 'POST',
+            },
+        );
+
+        if (resp.status !== 200) {
+            return false;
         }
 
+        try {
+            const body = await resp.json();
+            setUser(body);
+            return true;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+    };
+
+    const register = async (spotifyCode: string | null) : Promise<boolean> => {
         if (!spotifyCode) {
-            redirect('/');
-            return;
+            return false;
         }
 
-        if (madeLoginRequest.current) {
-            return;
-        }
-
-        madeLoginRequest.current = true;
-        fetch(
+        const resp = await fetch(
             `/api/register?code=${spotifyCode}`,
             {
                 method: 'POST',
             },
-        )
-            .then(resp => resp.json())
-            .then(resp => {
-                setUser(resp);
-                redirect('/home');
-            })
-            .catch(console.error)
-            .finally(() => madeLoginRequest.current = false);
+        );
+        if (resp.status !== 200) {
+            return false;
+        }
+
+        try {
+            const body = await resp.json();
+            setUser(body);
+            return true;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
     };
 
     return (
-        <UserContext.Provider value={{ login, user }}>
+        <UserContext.Provider value={{ login, register, user }}>
             {children}
         </UserContext.Provider>
     )
