@@ -13,7 +13,7 @@ const Callback: FC = () => {
 
     useEffect(() => {
         if (user) {
-            return navigate('/home');
+            return navigate('/compare');
         }
 
         if (madeRegisterRequest.current) {
@@ -34,7 +34,7 @@ const Callback: FC = () => {
 
     useEffect(() => {
         if (user) {
-            return navigate('/home');
+            return navigate('/compare');
         }
     }, [user]);
 

@@ -10,6 +10,14 @@ export const QUERY_CODE = 'code';
 export const QUERY_ID = 'id';
 export const QUERY_TYPE = 'type';
 export const QUERY_TIME_FRAME = 'timeframe';
+export const STORAGE_KEY = 'compare-query';
+
+export type CompareQueryStorage = {
+    timeOfStorage: number;
+    compareId: string;
+    compareType: string | null;
+    compareTimeFrame: string | null;
+};
 
 export type UserResponse = Omit<User, 'refreshToken'>;
 export type JWTObject = {

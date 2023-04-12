@@ -47,6 +47,7 @@ export default function withPrismaAndAuth(
         }
 
         const prismaClient = new PrismaClient();
+        console.log('prisma client created');
         const timeNow = Math.floor(Date.now() / 1000);
         let updateCookie = false;
 
@@ -122,6 +123,9 @@ export default function withPrismaAndAuth(
                     body: err.message,
                 };
             })
-            .finally(() => prismaClient.$disconnect());
+            .finally(() => {
+                prismaClient.$disconnect();
+                console.log('prisma client disconnected');
+            });
     };
 }

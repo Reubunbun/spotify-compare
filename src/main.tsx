@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './Routes/Login/Login';
 import Callback from './Routes/Callback/Callback';
-import Home from './Routes/Home/Home';
+import Compare from './Routes/Compare/Compare';
+import Auth from './Components/Auth/Auth';
 import { UserStateProvider } from './Context/UserContext';
 import './globals.css';
 
@@ -13,8 +14,8 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: '/home',
-    element: <Home />,
+    path: '/compare',
+    element: <Auth><Compare /></Auth>,
   },
   {
     path: '/callback',

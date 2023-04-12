@@ -5,15 +5,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../Context/UserContext';
-import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPES } from '../../../lib/Constants';
-
-const params = new URLSearchParams();
-params.append('response_type', 'code');
-params.append('client_id', SPOTIFY_CLIENT_ID);
-params.append('scope', SPOTIFY_SCOPES);
-params.append('redirect_uri', SPOTIFY_REDIRECT_URI);
-
-const queryParams = params.toString();
+import getSpotifyURL from '../../Helpers/GetSpotifyURL';
 
 const Login: FC = () => {
     const { user, login } = useUserContext();
@@ -22,7 +14,7 @@ const Login: FC = () => {
 
     const clickLogin = async () => {
         if (user) {
-            navigate('/home');
+            navigate('/compare');
         }
 
         if (madeLoginRequest.current) {
@@ -35,13 +27,13 @@ const Login: FC = () => {
         madeLoginRequest.current = false;
 
         if (!success) {
-            window.location.href = `https://accounts.spotify.com/authorize?${queryParams}`;
+            window.location.href = getSpotifyURL();
         }
     };
 
     useEffect(() => {
         if (user) {
-            navigate('/home');
+            navigate('/compare');
         }
     }, [user]);
 

@@ -21,9 +21,7 @@ export const UserStateProvider: FC<{ children: ReactNode }> = ({ children }) => 
     const login = async () : Promise<boolean> => {
         const resp = await fetch(
             '/api/login',
-            {
-                method: 'POST',
-            },
+            { method: 'POST' },
         );
 
         if (resp.status !== 200) {

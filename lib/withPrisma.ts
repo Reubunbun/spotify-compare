@@ -11,6 +11,7 @@ export default function withPrisma(
 {
     return async(event: HandlerEvent) => {
         const prismaClient = new PrismaClient();
+        console.log('prisma client created');
         return handler(prismaClient, event)
             .catch(err => {
                 console.error(err);
@@ -19,6 +20,9 @@ export default function withPrisma(
                     body: err.message,
                 };
             })
-            .finally(() => prismaClient.$disconnect());
+            .finally(() => {
+                prismaClient.$disconnect();
+                console.log('prisma client disconnected');
+            });
     };
 }
