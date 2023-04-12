@@ -1,10 +1,10 @@
 import withPrismaAndAuth from '../../lib/withPrismaAndAuth';
 import Spotify from '../../lib/Spotify';
+import { type UserResponse } from '../../lib/Constants';
 
 const handler = withPrismaAndAuth(async function(
     prismaClient,
     jwtObject,
-    event,
 ) {
     const user = await Spotify.getUserProfile(jwtObject.accessToken);
 
@@ -22,9 +22,16 @@ const handler = withPrismaAndAuth(async function(
         },
     });
 
+    const returnUser: UserResponse = {
+        email: updatedUser.email,
+        compareId: updatedUser.compareId,
+        displayHandle: updatedUser.displayHandle,
+        imageURL: updatedUser.imageURL,
+    };
+
     return {
         statusCode: 200,
-        body: JSON.stringify(updatedUser),
+        body: JSON.stringify(returnUser),
     };
 });
 
