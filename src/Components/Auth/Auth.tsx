@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import useLocalStorage from '../../Hooks/useLocalStorage';
 import { useUserContext } from '../../Context/UserContext';
 import getSpotifyURL from '../../Helpers/GetSpotifyURL';
+import { type TopItemRange, type TopItemType } from '../../../lib/Spotify';
 import {
     type CompareQueryStorage,
     QUERY_ID,
@@ -44,8 +45,8 @@ const Auth: FC<Props> = ({ children }) => {
                     setCompareQuery({
                         timeOfStorage: Math.floor(Date.now() / 1000),
                         compareId: queryId,
-                        compareType: queryParams.get(QUERY_CODE) || null,
-                        compareTimeFrame: queryParams.get(QUERY_TIME_FRAME) || null,
+                        compareType: (queryParams.get(QUERY_CODE) as TopItemType) || null,
+                        compareTimeFrame: (queryParams.get(QUERY_TIME_FRAME) as TopItemRange) || null,
                     });
                     window.location.href = getSpotifyURL();
                     return;

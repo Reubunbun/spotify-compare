@@ -4,7 +4,7 @@ import
     {
         type TopItemType,
         type TopItemRange,
-        type TopItemReturn,
+        TopItemReturn,
     }
 from '../../lib/Spotify';
 import {
@@ -64,7 +64,7 @@ const handler = withPrismaAndAuth(async function(
     const compareUser = await prismaClient.user.findFirst({
         where: { compareId: theirCompareId },
         select: {
-            email: true,
+            spotifyId: true,
             refreshToken: true,
             displayHandle: true,
             imageURL: true,
@@ -84,12 +84,8 @@ const handler = withPrismaAndAuth(async function(
     const theirCredentials = await Spotify.getAccessToken(compareUser.refreshToken);
 
     await prismaClient.user.update({
-        where: {
-            email: compareUser.email,
-        },
-        data: {
-            refreshToken: theirCredentials.refresh_token,
-        },
+        where: { spotifyId: compareUser.spotifyId },
+        data: { refreshToken: theirCredentials.refresh_token },
     });
 
     const theirTopItems = await Spotify.getTopItems(
@@ -98,13 +94,14 @@ const handler = withPrismaAndAuth(async function(
         theirCredentials.access_token,
     );
 
-    const mapIdToItem = new Map<string, CompareItem>();
+    const maxItems = Math.max(myTopItems.length, theirTopItems.length);
+
+    const mapIdToCrossover = new Map<string, CompareItem>();
 
     for (const [i, myTopItem] of Object.entries(myTopItems)) {
         for (const [j, theirTopItem] of Object.entries(theirTopItems)) {
             if (myTopItem.id === theirTopItem.id) {
-                // Using a map to avoid duplicates
-                mapIdToItem.set(
+                mapIdToCrossover.set(
                     myTopItem.id,
                     {
                         ...myTopItem,
@@ -112,19 +109,28 @@ const handler = withPrismaAndAuth(async function(
                         theirRank: Number(j) + 1,
                     },
                 );
+                break;
             }
         }
     }
 
-    const sortedCrossover = Array.from(mapIdToItem.values())
+    const myItemsExclusive = myTopItems.filter(item => !mapIdToCrossover.has(item.id));
+    const theirItemsExclusive = theirTopItems.filter(item => !mapIdToCrossover.has(item.id));
+
+    const sortedCrossover = Array.from(mapIdToCrossover.values())
         .sort((a, b) => (a.myRank + a.theirRank) - (b.myRank + b.theirRank));
 
+    const percentMatch = +((sortedCrossover.length / maxItems) * 100).toFixed(2);
+
     const response: CompareResponse = {
+        type: type,
+        range: timerange,
         thierName: compareUser.displayHandle,
         theirImageURL: compareUser.imageURL,
         crossoverItems: sortedCrossover,
-        myItems: myTopItems,
-        theirItems: theirTopItems,
+        myItems: myItemsExclusive,
+        theirItems: theirItemsExclusive,
+        percentMatch,
     };
 
     return {

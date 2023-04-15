@@ -186,8 +186,11 @@ export default class Spotify {
 
         return data.items.map(artistOrTrack => {
             let imageURL : string | null = null;
+            let href: string;
 
             if (artistOrTrack.type === 'artist') {
+                href = `https://open.spotify.com/artist/${artistOrTrack.id}`;
+
                 const bestImage = artistOrTrack.images.pop();
                 if (bestImage) {
                     imageURL = bestImage.url;
@@ -195,6 +198,8 @@ export default class Spotify {
             }
 
             if (artistOrTrack.type === 'track') {
+                href = `https://open.spotify.com/track/${artistOrTrack.id}`;
+
                 const bestImage = artistOrTrack.album.images.pop();
                 if (bestImage) {
                     imageURL = bestImage.url;
@@ -203,7 +208,7 @@ export default class Spotify {
 
             return {
                 id: artistOrTrack.id,
-                href: artistOrTrack.href,
+                href: href!,
                 name: artistOrTrack.name,
                 imageURL,
             };

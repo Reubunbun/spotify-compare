@@ -52,12 +52,8 @@ export default function withPrismaAndAuth(
         let updateCookie = false;
 
         const user = await prismaClient.user.findFirst({
-            where: {
-                email: jwtObject.email,
-            },
-            select: {
-                refreshToken: true,
-            },
+            where: { spotifyId: jwtObject.id },
+            select: { refreshToken: true },
         });
         if (!user) {
             return { statusCode: 401 };
@@ -86,12 +82,12 @@ export default function withPrismaAndAuth(
             }
 
             await prismaClient.user.update({
-                where: { email: jwtObject.email },
+                where: { spotifyId: jwtObject.id },
                 data: { refreshToken: newCredentials.refresh_token },
             });
 
             jwtObject = {
-                email: jwtObject.email,
+                id: jwtObject.id,
                 accessToken: newCredentials.access_token,
                 expiresAt: Math.floor(Date.now() / 1000) + newCredentials.expires_in,
             };

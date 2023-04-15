@@ -18,17 +18,13 @@ const handler = withPrisma(async function(
     event,
 ) {
     if (!event.queryStringParameters) {
-        return {
-            statusCode: 401,
-        };
+        return { statusCode: 401 };
     }
 
     const { [QUERY_CODE]: code } = event.queryStringParameters;
 
     if (!code) {
-        return {
-            statusCode: 401,
-        };
+        return { statusCode: 401 };
     }
 
     const authResponse = await Spotify.login(code);
@@ -42,16 +38,14 @@ const handler = withPrisma(async function(
     }
 
     const newUser = await prismaClient.user.upsert({
-        where: {
-            email: userResponse.email,
-        },
+        where: { spotifyId: userResponse.id },
         update: {
             refreshToken: authResponse.refresh_token,
             displayHandle: userResponse.display_name,
             imageURL,
         },
         create: {
-            email: userResponse.email,
+            spotifyId: userResponse.id,
             refreshToken: authResponse.refresh_token,
             compareId: uuid(),
             displayHandle: userResponse.display_name,
@@ -60,14 +54,13 @@ const handler = withPrisma(async function(
     });
 
     const returnUser: UserResponse = {
-        email: newUser.email,
         compareId: newUser.compareId,
         displayHandle: newUser.displayHandle,
         imageURL: newUser.imageURL,
     };
 
     const objToSign: JWTObject = {
-        email: newUser.email,
+        id: newUser.spotifyId,
         accessToken: authResponse.access_token,
         expiresAt: Math.floor(Date.now() / 1000) + authResponse.expires_in,
     };
@@ -85,9 +78,7 @@ const handler = withPrisma(async function(
 
     return {
         statusCode: 200,
-        headers: {
-            'Set-Cookie': cookie,
-        },
+        headers: { 'Set-Cookie': cookie },
         body: JSON.stringify(returnUser),
     };
 });

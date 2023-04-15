@@ -1,0 +1,34 @@
+.containerResult {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    height: 5rem;
+    width: 50%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: transform 0.5s ease-out;
+}
+
+.containerResult:hover {
+    transform: scale(1.03);
+}
+
+.containerResult img {
+    height: 95%;
+    width: auto;
+    margin-right: 0.5rem;
+}
+
+.containerResult > div {
+    height: 80%;
+}
+
+.containerResult p {
+    margin: 0;
+}
+.containerResult .name {
+    font-weight: 600;
+}
+.containerResult .rank {
+    font-size: 0.9em;
+}

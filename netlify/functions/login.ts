@@ -15,7 +15,7 @@ const handler = withPrismaAndAuth(async function(
     }
 
     const updatedUser = await prismaClient.user.update({
-        where: { email: jwtObject.email },
+        where: { spotifyId: jwtObject.id },
         data: {
             displayHandle: user.display_name,
             imageURL,
@@ -23,7 +23,6 @@ const handler = withPrismaAndAuth(async function(
     });
 
     const returnUser: UserResponse = {
-        email: updatedUser.email,
         compareId: updatedUser.compareId,
         displayHandle: updatedUser.displayHandle,
         imageURL: updatedUser.imageURL,
