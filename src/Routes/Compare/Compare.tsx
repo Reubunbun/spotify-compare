@@ -40,15 +40,6 @@ const Compare: FC = () => {
     const [initialQuery, setInitialQuery] = useLocalStorage<CompareQueryStorage | null>(STORAGE_KEY);
     const [comparisonId, setComparisonId] = useState<string>('');
     const [results, setResults] = useState<CompareResponse | null>(null);
-    const [link] = useState<string>(() => {
-        const url = new URL(window.location.href);
-        const params = new URLSearchParams();
-        params.append(QUERY_ID, user!.compareId);
-        params.append(QUERY_TYPE, DEFAULT_TYPE);
-        params.append(QUERY_TIME_FRAME, DEFAULT_TIME_FRAME);
-
-        return `${url.origin}${url.pathname}?${params.toString()}`;
-    });
     const [compareType, setCompareType] = useState<TopItemType>(() => {
         if (initialQuery && initialQuery.compareType) {
             return initialQuery.compareType;
@@ -78,7 +69,7 @@ const Compare: FC = () => {
             return;
         }
 
-        const body = await resp.json();
+        const body = await resp.json() as CompareResponse;
         console.log('Successfully got response from compare', body);
 
         setResults(body);
@@ -161,14 +152,19 @@ const Compare: FC = () => {
                 <div className={styles.titleContainer}>
                     <div>
                         <h1>COMPARIFY</h1>
-                        <p><b>Your ID:</b> <small>{user?.compareId}</small></p>
-                        <div className={styles.compareInputContainer}>
-                            <p><b>Comparing With:</b> </p>
-                            <input
-                                type='text'
-                                onChange={e => setComparisonId(e.target.value)}
-                                value={comparisonId}
-                            />
+                        <div className={styles.containerIDs}>
+                            <div className={styles.containerIDLabels}>
+                                <p><b>Your Id:</b></p>
+                                <p><b>Comparing With:</b></p>
+                            </div>
+                            <div className={styles.containerIDValues}>
+                                <p><small>{user?.compareId}</small></p>
+                                <input
+                                    type='text'
+                                    onChange={e => setComparisonId(e.target.value)}
+                                    value={comparisonId}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -212,11 +208,11 @@ const Compare: FC = () => {
                             Long Term
                         </button>
                     </div>
-                </div>
-                <div className={styles.containerCopy}>
-                    <p className={styles.copyLink}>
-                        <span onClick={handleCopyLink}>Click to copy your link!</span>
-                    </p>
+                    <div className={styles.containerCopy}>
+                        <p className={styles.copyLink}>
+                            <span onClick={handleCopyLink}>Click to generate your link!</span>
+                        </p>
+                    </div>
                 </div>
                 <div className={styles.containerStart}>
                     <div>
@@ -234,14 +230,14 @@ const Compare: FC = () => {
                                     src={user?.imageURL || DEFAULT_IMG}
                                     style={{
                                         left: `${results.percentMatch / 4}%`,
-                                        opacity: `${1 - ((results.percentMatch / 100) * 0.5)}`
+                                        opacity: `${1 - ((results.percentMatch / 100) * 0.25)}`
                                     }}
                                 />
                                 <img
                                     src={results.theirImageURL || DEFAULT_IMG}
                                     style={{
                                         right: `${results.percentMatch / 4}%`,
-                                        opacity: `${1 - ((results.percentMatch / 100) * 0.75)}`
+                                        opacity: `${1 - ((results.percentMatch / 100) * 0.8)}`
                                     }}
                                 />
                             </div>
