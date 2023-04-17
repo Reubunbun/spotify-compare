@@ -2,6 +2,9 @@
     width: 100vw;
     display: flex;
     justify-content: center;
+    background-color: black;
+
+    --default-spacing: 2rem;
 }
 
 .pageContainer {
@@ -10,7 +13,7 @@
     width: min(100%, 75rem);
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: var(--default-spacing);
 }
 
 .pageContainer h1,
@@ -57,8 +60,8 @@
     cursor: pointer;
     border: 1px solid black;
     transition:
-    background 0.2s ease-out,
-    color 0.2s ease-in;
+        background 0.2s ease-out,
+        color 0.2s ease-in;
 }
 .containerOptions button:hover {
     background: rgb(98, 116, 98);
@@ -90,6 +93,26 @@
     display: flex;
     justify-content: center;
 }
+.containerStart button {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 1rem;
+    font-size: 2em;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid black;
+    transition:
+        color .2s ease-out,
+        border .2s ease-in,
+        background-color .2s ease-in;
+}
+.containerStart button:hover {
+    color: green;
+    border: 2px solid green;
+    background-color: rgb(171, 202, 193);
+}
 
 .containerResults {
     background-color: rgb(10, 10, 10);
@@ -100,15 +123,28 @@
     text-align: center;
 }
 
+.containerResults .containerMatchInfo,
+.containerResults .containerCommon,
+.containerResults .containerYours,
+.containerResults .containerTheirs {
+    padding-top: calc(var(--default-spacing) / 2);
+    padding-bottom: calc(var(--default-spacing) / 2);
+}
+
 .containerResultImages {
     display: flex;
     justify-content: center;
-    margin-bottom: 1rem;
+    margin-bottom: calc(var(--default-spacing) / 2);
+}
+.containerResultImages > div {
+    display: flex;
+    transition: gap 0.75s ease-in-out;
 }
 .containerResultImages img {
     width: 125px;
     height: 125px;
     border-radius: 100%;
+    border: 2px solid white;
     position: relative;
     transition:
         left 0.75s ease-in-out,
@@ -116,7 +152,7 @@
         opacity 0.75s ease-in-out;
 }
 
-.containerResults > p {
+.containerMatchInfo p {
     text-align: center;
 }
 

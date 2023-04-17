@@ -95,6 +95,11 @@ const Compare: FC = () => {
         window.alert('Copied to clipboard!');
     };
 
+    const handleCopyId = () => {
+        navigator.clipboard.writeText(user!.compareId);
+        window.alert('Copied to clipboard!');
+    };
+
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
 
@@ -158,7 +163,7 @@ const Compare: FC = () => {
                                 <p><b>Comparing With:</b></p>
                             </div>
                             <div className={styles.containerIDValues}>
-                                <p><small>{user?.compareId}</small></p>
+                                <p onClick={handleCopyId}><small>{user?.compareId}</small></p>
                                 <input
                                     type='text'
                                     onChange={e => setComparisonId(e.target.value)}
@@ -214,7 +219,10 @@ const Compare: FC = () => {
                         </p>
                     </div>
                 </div>
-                <div className={styles.containerStart}>
+                <div
+                    className={styles.containerStart}
+                    style={{ marginBottom: !results ? 'var(--default-spacing)' : '' }}
+                >
                     <div>
                         <button type='button' onClick={handleComparison}>
                             Start!
@@ -223,26 +231,28 @@ const Compare: FC = () => {
                 </div>
                 {results ?
                     <div className={styles.containerResults}>
-                        <h2>You + {results.thierName}</h2>
-                        <div className={styles.containerResultImages}>
-                            <div>
-                                <img
-                                    src={user?.imageURL || DEFAULT_IMG}
-                                    style={{
-                                        left: `${results.percentMatch / 4}%`,
-                                        opacity: `${1 - ((results.percentMatch / 100) * 0.25)}`
-                                    }}
-                                />
-                                <img
-                                    src={results.theirImageURL || DEFAULT_IMG}
-                                    style={{
-                                        right: `${results.percentMatch / 4}%`,
-                                        opacity: `${1 - ((results.percentMatch / 100) * 0.8)}`
-                                    }}
-                                />
+                        <div className={styles.containerMatchInfo}>
+                            <h2>You + {results.thierName}</h2>
+                            <div className={styles.containerResultImages}>
+                                <div style={{gap: !results.percentMatch ? '1rem' : '0'}}>
+                                    <img
+                                        src={user?.imageURL || DEFAULT_IMG}
+                                        style={{
+                                            left: `${results.percentMatch / 4}%`,
+                                            opacity: `${1 - ((results.percentMatch / 100) * 0.25)}`
+                                        }}
+                                    />
+                                    <img
+                                        src={results.theirImageURL || DEFAULT_IMG}
+                                        style={{
+                                            right: `${results.percentMatch / 4}%`,
+                                            opacity: `${1 - ((results.percentMatch / 100) * 0.8)}`
+                                        }}
+                                    />
+                                </div>
                             </div>
+                            <p>{results.percentMatch}% Match For {RANGE_TO_DISPLAY[results.range]} {TYPE_TO_DISPLAY[results.type]}</p>
                         </div>
-                        <p>{results.percentMatch}% Match For {RANGE_TO_DISPLAY[results.range]} {TYPE_TO_DISPLAY[results.type]}</p>
                         <div className={styles.containerCommon}>
                             {results.crossoverItems.length ?
                                 <>
